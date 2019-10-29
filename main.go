@@ -8,6 +8,8 @@ import (
 	"os/exec"
 	"path"
 	"sync"
+
+	"github.com/Sirupsen/logrus"
 )
 
 func main() {
@@ -33,6 +35,10 @@ func main() {
 				c.Dir = file.Name()
 				out, err := c.CombinedOutput()
 				if err != nil {
+					logrus.WithFields(logrus.Fields{
+						"directory": file.Name(),
+						"output", string(out),
+					}).Error("error with directory")
 					fmt.Fprintln(os.Stderr, err)
 					fmt.Fprintf(os.Stderr, "error with dir %q: %s\n", file.Name(), string(out))
 				}
