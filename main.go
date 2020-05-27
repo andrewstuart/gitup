@@ -2,18 +2,18 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"sync"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	files, err := ioutil.ReadDir(".")
+	files, err := filepath.Glob("**/*.git/")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -21,9 +21,7 @@ func main() {
 	var wg sync.WaitGroup
 
 	for _, file := range files {
-		if file.IsDir() {
-			wg.Add(1)
-		}
+		file, _ := os.Stat(file)
 		go func(file os.FileInfo) {
 			defer wg.Done()
 			if file.IsDir() {
@@ -37,7 +35,7 @@ func main() {
 				if err != nil {
 					logrus.WithFields(logrus.Fields{
 						"directory": file.Name(),
-						"output", string(out),
+						"output":    string(out),
 					}).Error("error with directory")
 					fmt.Fprintln(os.Stderr, err)
 					fmt.Fprintf(os.Stderr, "error with dir %q: %s\n", file.Name(), string(out))
